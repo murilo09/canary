@@ -335,6 +335,25 @@ class Player final : public Creature, public Cylinder
 			return secureMode;
 		}
 
+		double_t getFatalChance() const {
+			return fatalChance;
+		}
+		void setFatalChance(double_t value) {
+			fatalChance = value;
+		}
+		double_t getMomentumChance() const {
+			return momentumChance;
+		}
+		void setMomentumChance(double_t value) {
+			momentumChance = value;
+		}
+		double_t getDodgeChance() const {
+			return dodgeChance;
+		}
+		void setDodgeChance(double_t value) {
+			dodgeChance = value;
+		}
+
 		void setParty(Party* newParty) {
 			this->party = newParty;
 		}
@@ -2468,6 +2487,10 @@ class Player final : public Creature, public Cylinder
 		bool moved = false;
 		bool dead = false;
 
+		double_t fatalChance = 0;
+		double_t momentumChance = 0;
+		double_t dodgeChance = 0;
+		
 		static uint32_t playerAutoID;
 
 		void updateItemsLight(bool internal = false);

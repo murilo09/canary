@@ -436,77 +436,87 @@ uint32_t MoveEvent::EquipItem(MoveEvent* moveEvent, Player* player, Item* item, 
 		g_game().increasePlayerActiveImbuements(player->getID());
 	}
 
-	if (!it.abilities) {
-		return 1;
-	}
-
-	if (it.abilities->invisible) {
-		Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_INVISIBLE, -1, 0);
-		player->addCondition(condition);
-	}
-
-	if (it.abilities->manaShield) {
-		Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_MANASHIELD, -1, 0);
-		player->addCondition(condition);
-	}
-
-	if (it.abilities->speed != 0) {
-		g_game().changePlayerSpeed(*player, it.abilities->speed);
-	}
-
-	if (it.abilities->conditionSuppressions != 0) {
-		player->addConditionSuppressions(it.abilities->conditionSuppressions);
-		player->sendIcons();
-	}
-
-	if (it.abilities->regeneration) {
-		Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_REGENERATION, -1, 0);
-
-		if (it.abilities->getHealthGain() != 0) {
-			condition->setParam(CONDITION_PARAM_HEALTHGAIN, it.abilities->getHealthGain());
+	if (it.abilities) {
+		if (it.abilities->invisible) {
+			Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_INVISIBLE, -1, 0);
+			player->addCondition(condition);
 		}
 
-		if (it.abilities->getHealthTicks() != 0) {
-			condition->setParam(CONDITION_PARAM_HEALTHTICKS, it.abilities->getHealthTicks());
+		if (it.abilities->manaShield) {
+			Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_MANASHIELD, -1, 0);
+			player->addCondition(condition);
 		}
 
-		if (it.abilities->getManaGain() != 0) {
-			condition->setParam(CONDITION_PARAM_MANAGAIN, it.abilities->getManaGain());
+		if (it.abilities->speed != 0) {
+			g_game().changePlayerSpeed(*player, it.abilities->speed);
 		}
 
-		if (it.abilities->getManaTicks() != 0) {
-			condition->setParam(CONDITION_PARAM_MANATICKS, it.abilities->getManaTicks());
+		if (it.abilities->conditionSuppressions != 0) {
+			player->addConditionSuppressions(it.abilities->conditionSuppressions);
+			player->sendIcons();
 		}
 
-		player->addCondition(condition);
-	}
+		if (it.abilities->regeneration) {
+			Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_REGENERATION, -1, 0);
 
-	//skill/stats modifiers
-	bool needUpdate = false;
+			if (it.abilities->getHealthGain() != 0) {
+				condition->setParam(CONDITION_PARAM_HEALTHGAIN, it.abilities->getHealthGain());
+			}
 
-	for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
-		if (it.abilities->skills[i]) {
-			needUpdate = true;
-			player->setVarSkill(static_cast<skills_t>(i), it.abilities->skills[i]);
+			if (it.abilities->getHealthTicks() != 0) {
+				condition->setParam(CONDITION_PARAM_HEALTHTICKS, it.abilities->getHealthTicks());
+			}
+
+			if (it.abilities->getManaGain() != 0) {
+				condition->setParam(CONDITION_PARAM_MANAGAIN, it.abilities->getManaGain());
+			}
+
+			if (it.abilities->getManaTicks() != 0) {
+				condition->setParam(CONDITION_PARAM_MANATICKS, it.abilities->getManaTicks());
+			}
+
+			player->addCondition(condition);
 		}
-	}
 
-	for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
-		if (it.abilities->stats[s]) {
-			needUpdate = true;
-			player->setVarStats(static_cast<stats_t>(s), it.abilities->stats[s]);
+		//skill/stats modifiers
+		for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
+			if (it.abilities->skills[i]) {
+				player->setVarSkill(static_cast<skills_t>(i), it.abilities->skills[i]);
+			}
 		}
 
-		if (it.abilities->statsPercent[s]) {
-			needUpdate = true;
-			player->setVarStats(static_cast<stats_t>(s), static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
+		for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
+			if (it.abilities->stats[s]) {
+				player->setVarStats(static_cast<stats_t>(s), it.abilities->stats[s]);
+			}
+
+			if (it.abilities->statsPercent[s]) {
+				player->setVarStats(static_cast<stats_t>(s), static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
+			}
 		}
 	}
 
-	if (needUpdate) {
-		player->sendStats();
-		player->sendSkills();
+	
+	if (player->getInventoryItem(CONST_SLOT_LEFT) != nullptr) {
+		player->setFatalChance(player->getInventoryItem(CONST_SLOT_LEFT)->getFatalChance());
+	}else{
+		player->setFatalChance(0);
 	}
+
+	if (player->getInventoryItem(CONST_SLOT_HEAD) != nullptr) {
+		player->setMomentumChance(player->getInventoryItem(CONST_SLOT_HEAD)->getMomentumChance());
+	}else{
+		player->setMomentumChance(0);
+	}
+
+	if (player->getInventoryItem(CONST_SLOT_ARMOR) != nullptr) {
+		player->setDodgeChance(player->getInventoryItem(CONST_SLOT_ARMOR)->getDodgeChance());
+	}else{
+		player->setDodgeChance(0);
+	}
+
+	player->sendStats();
+	player->sendSkills();
 
 	return 1;
 }
@@ -544,56 +554,71 @@ uint32_t MoveEvent::DeEquipItem(MoveEvent*, Player* player, Item* item, Slots_t 
 	}
 
 	if (!it.abilities) {
-		return 1;
-	}
+		if (it.abilities->invisible) {
+			player->removeCondition(CONDITION_INVISIBLE, static_cast<ConditionId_t>(slot));
+		}
 
-	if (it.abilities->invisible) {
-		player->removeCondition(CONDITION_INVISIBLE, static_cast<ConditionId_t>(slot));
-	}
+		if (it.abilities->manaShield) {
+			player->removeCondition(CONDITION_MANASHIELD, static_cast<ConditionId_t>(slot));
+		}
 
-	if (it.abilities->manaShield) {
-		player->removeCondition(CONDITION_MANASHIELD, static_cast<ConditionId_t>(slot));
-	}
+		if (it.abilities->speed != 0) {
+			g_game().changePlayerSpeed(*player, -it.abilities->speed);
+		}
 
-	if (it.abilities->speed != 0) {
-		g_game().changePlayerSpeed(*player, -it.abilities->speed);
-	}
+		if (it.abilities->conditionSuppressions != 0) {
+			player->removeConditionSuppressions(it.abilities->conditionSuppressions);
+			player->sendIcons();
+		}
 
-	if (it.abilities->conditionSuppressions != 0) {
-		player->removeConditionSuppressions(it.abilities->conditionSuppressions);
-		player->sendIcons();
-	}
+		if (it.abilities->regeneration) {
+			player->removeCondition(CONDITION_REGENERATION, static_cast<ConditionId_t>(slot));
+		}
 
-	if (it.abilities->regeneration) {
-		player->removeCondition(CONDITION_REGENERATION, static_cast<ConditionId_t>(slot));
-	}
+		//skill/stats modifiers
+		bool needUpdate = false;
 
-	//skill/stats modifiers
-	bool needUpdate = false;
+		for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
+			if (it.abilities->skills[i] != 0) {
+				needUpdate = true;
+				player->setVarSkill(static_cast<skills_t>(i), -it.abilities->skills[i]);
+			}
+		}
 
-	for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
-		if (it.abilities->skills[i] != 0) {
-			needUpdate = true;
-			player->setVarSkill(static_cast<skills_t>(i), -it.abilities->skills[i]);
+		for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
+			if (it.abilities->stats[s]) {
+				needUpdate = true;
+				player->setVarStats(static_cast<stats_t>(s), -it.abilities->stats[s]);
+			}
+
+			if (it.abilities->statsPercent[s]) {
+				needUpdate = true;
+				player->setVarStats(static_cast<stats_t>(s), -static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
+			}
 		}
 	}
 
-	for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
-		if (it.abilities->stats[s]) {
-			needUpdate = true;
-			player->setVarStats(static_cast<stats_t>(s), -it.abilities->stats[s]);
-		}
-
-		if (it.abilities->statsPercent[s]) {
-			needUpdate = true;
-			player->setVarStats(static_cast<stats_t>(s), -static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
-		}
+	if (player->getInventoryItem(CONST_SLOT_LEFT) != nullptr) {
+		player->setFatalChance(player->getInventoryItem(CONST_SLOT_LEFT)->getFatalChance());
+	}else{
+		player->setFatalChance(0);
 	}
 
-	if (needUpdate) {
-		player->sendStats();
-		player->sendSkills();
+	if (player->getInventoryItem(CONST_SLOT_HEAD) != nullptr) {
+		player->setMomentumChance(player->getInventoryItem(CONST_SLOT_HEAD)->getMomentumChance());
+	}else{
+		player->setMomentumChance(0);
 	}
+
+	if (player->getInventoryItem(CONST_SLOT_ARMOR) != nullptr) {
+		player->setDodgeChance(player->getInventoryItem(CONST_SLOT_ARMOR)->getDodgeChance());
+	}else{
+		player->setDodgeChance(0);
+	}
+
+	player->sendStats();
+	player->sendSkills();
+	
 
 	return 1;
 }
