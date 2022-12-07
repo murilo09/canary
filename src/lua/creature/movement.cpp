@@ -478,7 +478,7 @@ uint32_t MoveEvent::EquipItem(MoveEvent* moveEvent, Player* player, Item* item, 
 			player->addCondition(condition);
 		}
 
-		//skill/stats modifiers
+		// Skill and stats modifiers
 		for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
 			if (it.abilities->skills[i]) {
 				player->setVarSkill(static_cast<skills_t>(i), it.abilities->skills[i]);
@@ -494,25 +494,6 @@ uint32_t MoveEvent::EquipItem(MoveEvent* moveEvent, Player* player, Item* item, 
 				player->setVarStats(static_cast<stats_t>(s), static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
 			}
 		}
-	}
-
-	
-	if (player->getInventoryItem(CONST_SLOT_LEFT) != nullptr) {
-		player->setFatalChance(player->getInventoryItem(CONST_SLOT_LEFT)->getFatalChance());
-	}else{
-		player->setFatalChance(0);
-	}
-
-	if (player->getInventoryItem(CONST_SLOT_HEAD) != nullptr) {
-		player->setMomentumChance(player->getInventoryItem(CONST_SLOT_HEAD)->getMomentumChance());
-	}else{
-		player->setMomentumChance(0);
-	}
-
-	if (player->getInventoryItem(CONST_SLOT_ARMOR) != nullptr) {
-		player->setDodgeChance(player->getInventoryItem(CONST_SLOT_ARMOR)->getDodgeChance());
-	}else{
-		player->setDodgeChance(0);
 	}
 
 	player->sendStats();
@@ -574,24 +555,19 @@ uint32_t MoveEvent::DeEquipItem(MoveEvent*, Player* player, Item* item, Slots_t 
 			player->removeCondition(CONDITION_REGENERATION, static_cast<ConditionId_t>(slot));
 		}
 
-		//skill/stats modifiers
-		bool needUpdate = false;
-
+		// Skill and stats modifiers
 		for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
 			if (it.abilities->skills[i] != 0) {
-				needUpdate = true;
 				player->setVarSkill(static_cast<skills_t>(i), -it.abilities->skills[i]);
 			}
 		}
 
 		for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
 			if (it.abilities->stats[s]) {
-				needUpdate = true;
 				player->setVarStats(static_cast<stats_t>(s), -it.abilities->stats[s]);
 			}
 
 			if (it.abilities->statsPercent[s]) {
-				needUpdate = true;
 				player->setVarStats(static_cast<stats_t>(s), -static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
 			}
 		}
