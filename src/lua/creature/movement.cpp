@@ -573,24 +573,6 @@ uint32_t MoveEvent::DeEquipItem(MoveEvent*, Player* player, Item* item, Slots_t 
 		}
 	}
 
-	if (player->getInventoryItem(CONST_SLOT_LEFT) != nullptr) {
-		player->setFatalChance(player->getInventoryItem(CONST_SLOT_LEFT)->getFatalChance());
-	}else{
-		player->setFatalChance(0);
-	}
-
-	if (player->getInventoryItem(CONST_SLOT_HEAD) != nullptr) {
-		player->setMomentumChance(player->getInventoryItem(CONST_SLOT_HEAD)->getMomentumChance());
-	}else{
-		player->setMomentumChance(0);
-	}
-
-	if (player->getInventoryItem(CONST_SLOT_ARMOR) != nullptr) {
-		player->setDodgeChance(player->getInventoryItem(CONST_SLOT_ARMOR)->getDodgeChance());
-	}else{
-		player->setDodgeChance(0);
-	}
-
 	player->sendStats();
 	player->sendSkills();
 	return 1;
