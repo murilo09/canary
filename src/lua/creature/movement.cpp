@@ -517,7 +517,6 @@ uint32_t MoveEvent::EquipItem(MoveEvent* moveEvent, Player* player, Item* item, 
 
 	player->sendStats();
 	player->sendSkills();
-
 	return 1;
 }
 
@@ -618,8 +617,6 @@ uint32_t MoveEvent::DeEquipItem(MoveEvent*, Player* player, Item* item, Slots_t 
 
 	player->sendStats();
 	player->sendSkills();
-	
-
 	return 1;
 }
 
