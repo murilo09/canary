@@ -3058,12 +3058,11 @@ void ProtocolGame::sendCyclopediaCharacterCombatStats()
 	}
 
 	// Version 12.81 new skill (Fatal, Dodge and Momentum)
-	msg.add<uint16_t>(player->getFatalChance() < 0 ? 0 : player->getFatalChance() * 100);
-	msg.add<uint16_t>(player->getFatalChance() < 0 ? 0 : player->getFatalChance() * 100);
-	msg.add<uint16_t>(player->getDodgeChance() < 0 ? 0 : player->getDodgeChance() * 100);
-	msg.add<uint16_t>(player->getDodgeChance() < 0 ? 0 : player->getDodgeChance() * 100);
-	msg.add<uint16_t>(player->getMomentumChance() < 0 ? 0 : player->getMomentumChance() * 100);
-	msg.add<uint16_t>(player->getMomentumChance() < 0 ? 0 : player->getMomentumChance() * 100);
+	for (uint8_t i = 1; i <= 3; ++i) {
+		msg.add<uint16_t>(0);
+		msg.add<uint16_t>(0);
+	}
+
 	// Cleave (12.70)
 	msg.add<uint16_t>(0);
 	// Magic shield capacity (12.70)
@@ -6658,12 +6657,10 @@ void ProtocolGame::AddPlayerSkills(NetworkMessage &msg)
 	}
 
 	// Version 12.81 new skill (Fatal, Dodge and Momentum)
-	msg.add<uint16_t>(player->getFatalChance() < 0 ? 0 : player->getFatalChance() * 100);
-	msg.add<uint16_t>(player->getFatalChance() < 0 ? 0 : player->getFatalChance() * 100);
-	msg.add<uint16_t>(player->getDodgeChance() < 0 ? 0 : player->getDodgeChance() * 100);
-	msg.add<uint16_t>(player->getDodgeChance() < 0 ? 0 : player->getDodgeChance() * 100);
-	msg.add<uint16_t>(player->getMomentumChance() < 0 ? 0 : player->getMomentumChance() * 100);
-	msg.add<uint16_t>(player->getMomentumChance() < 0 ? 0 : player->getMomentumChance() * 100);
+	for (uint8_t i = 1; i <= 3; ++i) {
+		msg.add<uint16_t>(0);
+		msg.add<uint16_t>(0);
+	}
 
 	// used for imbuement (Feather)
 	msg.add<uint32_t>(player->getCapacity()); // total capacity
