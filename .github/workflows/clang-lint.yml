@@ -1,0 +1,31 @@
+---
+name: Clang-format
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: DoozyX/clang-format-lint-action@v0.14
+        with:
+          source: "src"
+          exclude: "src/protobuf"
+          extensions: "cpp,hpp,h"
+          clangFormatVersion: 14
+          inplace: True
+
+      - uses: EndBug/add-and-commit@v4
+        with:
+          author_name: Beats
+          author_email: daniel15042014@hotmail.com
+          message: "Code format"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
